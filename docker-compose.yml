@@ -5,17 +5,65 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        - OTEL_SERVICE_NAME=ServicoA
     env_file: 
       - ./cmd/server/.env
     restart: unless-stopped
     ports:
       - "8080:8080"
+    networks:
+      - app-network
+
   goappb:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        - OTEL_SERVICE_NAME=ServicoB
     env_file: 
       - ./cmd/server/.env
     restart: unless-stopped
     ports:
       - "8181:8080"
+    networks:
+      - app-network
+
+  zipkin:
+    container_name: zipkin
+    hostname: zipkin
+    restart: always
+    image: openzipkin/zipkin:latest
+    ports:
+      - 9411:9411 # Port used for the Zipkin UI and HTTP Api
+    environment:
+      - STORAGE_TYPE=mem
+      - JAVA_OPTS=-Xms1024m -Xmx1024m -XX:+ExitOnOutOfMemoryError
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --no-verbose --tries=1 --timeout=5 http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  otel-collector:
+    restart: always
+    image: otel/opentelemetry-collector-contrib
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - 1888:1888   # pprof extension
+      - 8888:8888   # Prometheus metrics exposed by the collector
+      - 8889:8889   # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317   # OTLP gRPC receiver
+      - 55679:55679 # zpages extension
+    volumes:
+      - ./.docker/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - app-network
+    depends_on:
+      - zipkin
+
+networks:
+  app-network:

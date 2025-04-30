@@ -10,30 +10,42 @@ import (
 	"github.com/gblcarvalho/go-expert-lab-otel/internal/usecases"
 	"github.com/gblcarvalho/go-expert-lab-otel/internal/utils"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type WeatherHandler struct {
-	cepGateway     gateways.CEPGatewayInterface
-	weatherGateway gateways.WeatherGatewayInterface
+	cepGateway        gateways.CEPGatewayInterface
+	weatherGateway    gateways.WeatherGatewayInterface
 	getWeatherGateway gateways.GetWeatherInterface
+	tracer            trace.Tracer
 }
 
 func NewWeatherHandler(
 	cepGateway gateways.CEPGatewayInterface,
 	weatherGateway gateways.WeatherGatewayInterface,
 	getWeatherGateway gateways.GetWeatherInterface,
+	tracer trace.Tracer,
 ) *WeatherHandler {
 	return &WeatherHandler{
-		cepGateway:     cepGateway,
-		weatherGateway: weatherGateway,
+		cepGateway:        cepGateway,
+		weatherGateway:    weatherGateway,
 		getWeatherGateway: getWeatherGateway,
+		tracer:            tracer,
 	}
 }
 
 func (h *WeatherHandler) GetComplete(w http.ResponseWriter, r *http.Request) {
+	carrier := propagation.HeaderCarrier(r.Header)
+	ctx := r.Context()
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier) 
+	ctx, span := h.tracer.Start(ctx, "get weather complete")
+	defer span.End()
+
 	cep := chi.URLParam(r, "cep")
 	getWeatherCompleteUC := usecases.NewGetWeatherCompleteUseCase(h.getWeatherGateway)
-	output, err := getWeatherCompleteUC.Execute(cep)
+	output, err := getWeatherCompleteUC.Execute(ctx, cep)
 	if err != nil {
 		fmt.Println(err)
 		if errors.Is(err, utils.ErrInvalidCEP) {
@@ -54,9 +66,15 @@ func (h *WeatherHandler) GetComplete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WeatherHandler) Get(w http.ResponseWriter, r *http.Request) {
+	carrier := propagation.HeaderCarrier(r.Header)
+	ctx := r.Context()
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier) 
+	ctx, span := h.tracer.Start(ctx, "get weather")
+	defer span.End()
+
 	cep := chi.URLParam(r, "cep")
 	getWeatherUC := usecases.NewGetWeatherUseCase(h.cepGateway, h.weatherGateway)
-	output, err := getWeatherUC.Execute(cep)
+	output, err := getWeatherUC.Execute(ctx, cep)
 	if err != nil {
 		if errors.Is(err, utils.ErrInvalidCEP) {
 			http.Error(w, "invalid zipcode", http.StatusUnprocessableEntity)

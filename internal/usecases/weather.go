@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"context"
+
 	"github.com/gblcarvalho/go-expert-lab-otel/internal/gateways"
 	"github.com/gblcarvalho/go-expert-lab-otel/internal/utils"
 	"github.com/gblcarvalho/go-expert-lab-otel/internal/valueobjects"
@@ -22,12 +24,12 @@ func NewGetWeatherCompleteUseCase(getWeatherGateway gateways.GetWeatherInterface
 	return &GetWeatherCompleteUseCase{getWeatherGateway: getWeatherGateway}
 }
 
-func (uc *GetWeatherCompleteUseCase) Execute(cepStr string) (GetWeatherCompleteUseCaseOutput, error) {
+func (uc *GetWeatherCompleteUseCase) Execute(ctx context.Context, cepStr string) (GetWeatherCompleteUseCaseOutput, error) {
 	cep, err := valueobjects.NewCEP(cepStr)
 	if err != nil {
 		return GetWeatherCompleteUseCaseOutput{}, utils.ErrInvalidCEP
 	}
-	result, err := uc.getWeatherGateway.GetWeather(cep.Value())
+	result, err := uc.getWeatherGateway.GetWeather(ctx, cep.Value())
 	if err != nil {
 		return GetWeatherCompleteUseCaseOutput{}, err
 	}
@@ -61,12 +63,12 @@ func NewGetWeatherUseCase(
 	}
 }
 
-func (uc *GetWeatherUseCase) Execute(cepStr string) (GetWeatherUseCaseOutput, error) {
-	location, err := uc.cepGateway.GetLocation(cepStr)
+func (uc *GetWeatherUseCase) Execute(ctx context.Context, cepStr string) (GetWeatherUseCaseOutput, error) {
+	location, err := uc.cepGateway.GetLocation(ctx, cepStr)
 	if err != nil {
 		return GetWeatherUseCaseOutput{}, utils.ErrCEPNotFound
 	}
-	weather, err := uc.weatherGateway.GetWeather(location.Locality)
+	weather, err := uc.weatherGateway.GetWeather(ctx, location.Locality)
 	if err != nil {
 		return GetWeatherUseCaseOutput{}, utils.ErrWeather
 	}

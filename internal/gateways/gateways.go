@@ -1,15 +1,17 @@
 package gateways
 
+import "context"
+
 type GetWeatherInterface interface {
-	GetWeather(cep string) (GetWeatherResult, error)
+	GetWeather(ctx context.Context, cep string) (GetWeatherResult, error)
 }
 
 type CEPGatewayInterface interface {
-	GetLocation(cep string) (CEPLocation, error)
+	GetLocation(ctx context.Context, cep string) (CEPLocation, error)
 }
 
 type WeatherGatewayInterface interface {
-	GetWeather(locality string) (WeatherTemp, error)
+	GetWeather(ctx context.Context, locality string) (WeatherTemp, error)
 }
 
 type CEPLocation struct {

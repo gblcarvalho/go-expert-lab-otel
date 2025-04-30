@@ -5,6 +5,8 @@ import "github.com/spf13/viper"
 type conf struct {
 	WeatherApiKey string `mapstructure:"WEATHER_API_KEY"`
 	GetWeatherHost string `mapstructure:"GET_WEATHER_HOST"`
+	OTELServiceName string `mapstructure:"OTEL_SERVICE_NAME"`
+	OTELCollectorURL string `mapstructure:"OTEL_COLLECTOR_URL"`
 }
 
 func LoadConfig(path string) (*conf, error) {

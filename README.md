@@ -29,9 +29,13 @@ docker compose --env-file ./cmd/server/.env up -d
 Este comando irá:
 
 - Iniciar dois containers do servidor da applicação Go
+- Iniciar OTEL Collector
+- Zipkin
 
 
 O serviço da aplicação está disponíveis em
 - HTTP (RESTful): http://localhost:8080/weather-complete/{cep} // Serviço A
 - HTTP (RESTful): http://localhost:8080/weather/{cep} // Serviço B
 
+Para acessar o Zipkin
+- http://localhost:9411

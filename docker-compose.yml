@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  goapp:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file: 
+      - ./cmd/server/.env
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+  goappb:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file: 
+      - ./cmd/server/.env
+    restart: unless-stopped
+    ports:
+      - "8181:8080"

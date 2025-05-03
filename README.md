@@ -34,8 +34,8 @@ Este comando irá:
 
 
 O serviço da aplicação está disponíveis em
-- HTTP (RESTful): http://localhost:8080/weather-complete/{cep} // Serviço A
-- HTTP (RESTful): http://localhost:8080/weather/{cep} // Serviço B
+- HTTP (RESTful) POST: http://localhost:8080/weather // Serviço A -> Principal pedido no enunciado
+- HTTP (RESTful)  GET: http://localhost:8080/weather-apis/{cep} // Serviço B {cep} deve ser substituido com o CEP desejado
 
 Para acessar o Zipkin
 - http://localhost:9411

@@ -74,6 +74,7 @@ func (uc *GetWeatherUseCase) Execute(ctx context.Context, cepStr string) (GetWea
 	}
 
 	return GetWeatherUseCaseOutput{
+		City: weather.City,
 		Celsius: weather.Celsius,
 		Fahrenheit: CelsiusToFahrenheit(weather.Celsius),
 		Kelvin: CelsiusToKelvin(weather.Celsius),

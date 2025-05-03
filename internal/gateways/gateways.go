@@ -19,7 +19,8 @@ type CEPLocation struct {
 }
 
 type WeatherTemp struct {
-	Celsius    float64
+	City    string
+	Celsius float64
 }
 
 type GetWeatherResult struct {

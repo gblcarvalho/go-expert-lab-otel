@@ -36,6 +36,10 @@ func NewWeatherHandler(
 	}
 }
 
+type GetCompleteReq struct {
+	CEP string `json:"cep"`
+}
+
 func (h *WeatherHandler) GetComplete(w http.ResponseWriter, r *http.Request) {
 	carrier := propagation.HeaderCarrier(r.Header)
 	ctx := r.Context()
@@ -43,9 +47,18 @@ func (h *WeatherHandler) GetComplete(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(ctx, "get weather complete")
 	defer span.End()
 
-	cep := chi.URLParam(r, "cep")
+	var req GetCompleteReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.CEP == "" {
+		http.Error(w, "cep is required", http.StatusBadRequest)
+		return
+	}
+
 	getWeatherCompleteUC := usecases.NewGetWeatherCompleteUseCase(h.getWeatherGateway)
-	output, err := getWeatherCompleteUC.Execute(ctx, cep)
+	output, err := getWeatherCompleteUC.Execute(ctx, req.CEP)
 	if err != nil {
 		fmt.Println(err)
 		if errors.Is(err, utils.ErrInvalidCEP) {

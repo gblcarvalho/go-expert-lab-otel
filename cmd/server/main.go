@@ -89,8 +89,8 @@ func main() {
 
 	handler := web.NewWeatherHandler(cepGateway, weatherGateway, getWeatherGateway, tracer)
 
-	r.Get("/weather-complete/{cep}", handler.GetComplete)
-	r.Get("/weather/{cep}", handler.Get)
+	r.Post("/weather", handler.GetComplete)
+	r.Get("/weather-apis/{cep}", handler.Get)
 	r.Handle("/metrics", promhttp.Handler())
 	err = http.ListenAndServe(":8080", r)
 	fmt.Println(err)

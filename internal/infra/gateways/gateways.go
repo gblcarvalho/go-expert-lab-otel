@@ -20,7 +20,7 @@ type ViaCEPGateway struct {
 
 const ViaCEPURL = "https://viacep.com.br/ws/%s/json/"
 const WeatherAPIURL = "https://api.weatherapi.com/v1/current.json?q=%s&key=%s"
-const GetWeatherURL = "%s/weather/%s"
+const GetWeatherURL = "%s/weather-apis/%s"
 
 type ViaCEPResp struct {
 	Localidade string `json:"localidade,omitempty"`
@@ -28,6 +28,9 @@ type ViaCEPResp struct {
 }
 
 type WeatherAPIResp struct {
+	Location struct {
+		Name string `json:"name"`
+	} `json:"location"`
 	Current struct {
 		TempC float64 `json:"temp_c"`
 	} `json:"current"`
@@ -112,6 +115,7 @@ func (w *WeatherAPIGateway)	GetWeather(ctx context.Context, locality string) (ga
 	}
 
 	return gateways.WeatherTemp{
+		City: result.Location.Name,
 		Celsius: result.Current.TempC,
 	}, nil
 }
